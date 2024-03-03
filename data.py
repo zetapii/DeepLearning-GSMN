@@ -20,7 +20,6 @@ import pandas as pd
 import json
 import nltk
 
-
 class PrecompDataset(data.Dataset):
     """
     Load precomputed captions and image features
@@ -28,27 +27,51 @@ class PrecompDataset(data.Dataset):
     """
 
     def __init__(self, data_path, data_split, vocab):
+        '''
+            Variables(2 March 2024):
+            29000 training images
+            36 regions of interests each
+            2048 feature vector dimension for each region
+            5 captions per image
+        '''
         self.vocab = vocab
         loc = data_path + '/'
-
+        print(data_split)
+        print('DataLoader loading image features file: %s' % loc + '%s_ims.npy' % data_split)
+        print('DataLoader loading image bounding box file: %s' % loc + '%s_ims_bbx.npy' % data_split)
+        print('DataLoader loading image size file: %s' % loc + '%s_ims_size.npy' % data_split)
+        print('DataLoader loading captions file: %s' % loc + '%s_precaps_stan.txt' % data_split)
         # Captions
         self.captions = []
+        cnt = 0
         with open(loc + '%s_precaps_stan.txt' % data_split, 'rb') as f:
             for line in f:
                 self.captions.append(line.strip())
-
+                cnt = cnt + 1
+                if cnt == 10:
+                    break
+        
         # Image features
-        self.images = np.load(loc + '%s_ims.npy' % data_split)
+        self.images = np.load(loc + '%s_ims.npy' % data_split)[:2]
         self.length = len(self.captions)
 
-        self.bbox = np.load(loc + '%s_ims_bbx.npy' % data_split)
-        self.sizes = np.load(loc + '%s_ims_size.npy' % data_split)
-
+        self.bbox = np.load(loc + '%s_ims_bbx.npy' % data_split)[:2]
+        self.sizes = np.load(loc + '%s_ims_size.npy' % data_split, allow_pickle=True)[:2]
         with open(loc + '%s_caps.json' % data_split) as f:
             self.depends = json.load(f)
 
         print('image shape', self.images.shape)
+        print('bbox shape', len(self.bbox))
         print('text shape', len(self.captions))
+        print('value of cnt',cnt)
+        print('value of size is ',self.sizes)
+        print('shape of size is ',self.sizes.shape)
+        print('shape of pracapsstan.txt is ',len(self.captions))
+        print("type of image[2] is",type(self.images[0][0][2]))
+        print("length of list is ",len(self.depends))
+        print("0th item is",self.depends[0])
+        
+        self.depends = self.depends[:10]
 
         # rkiros data has redundancy in images, we divide by 5, 10crop doesn't
         if self.images.shape[0] != self.length:
@@ -56,12 +79,18 @@ class PrecompDataset(data.Dataset):
         else:
             self.im_div = 1
         # the development set for coco is large and so validation would be slow
-        if data_split == 'dev':
-            self.length = 5000
+            
+        print(data_split)
+        # if data_split == 'dev': 
+        #     self.length = 5000
+
 
     def __getitem__(self, index):
         # handle the image redundancy
-        img_id = index / self.im_div
+
+        img_id = int(index / self.im_div)
+
+        img_id = int(img_id)
         image = torch.Tensor(self.images[img_id])
         caption = self.captions[index]
         vocab = self.vocab
@@ -69,7 +98,7 @@ class PrecompDataset(data.Dataset):
 
         # Convert caption (string) to word ids.
         caps = []
-        caps.extend(caption.split(','))
+        caps.extend(caption.decode('utf-8').split(','))
         caps = map(int, caps)
 
         # Load bbox and its size
@@ -87,7 +116,7 @@ class PrecompDataset(data.Dataset):
             bbox[3] /= imsize['image_h']
             bboxes[i] = bbox
 
-        captions = torch.Tensor(caps)
+        captions = torch.Tensor(list(caps))
         bboxes = torch.Tensor(bboxes)
         return image, captions, bboxes, depend, index, img_id
 
@@ -129,7 +158,6 @@ def get_precomp_loader(data_path, data_split, vocab, opt, batch_size=100,
                        shuffle=True, num_workers=2):
     """Returns torch.utils.data.DataLoader for custom coco dataset."""
     dset = PrecompDataset(data_path, data_split, vocab)
-
     data_loader = torch.utils.data.DataLoader(dataset=dset,
                                               batch_size=batch_size,
                                               shuffle=shuffle,

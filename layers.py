@@ -73,7 +73,7 @@ class ImageQueryGraphConvolution(Module):
         ## Returns:
         - convolved_features (batch_size, K, neighbourhood_size, out_feat_dim)
         '''
-
+        
         # set parameters
         batch_size = neighbourhood_features.size(0)
         K = neighbourhood_features.size(1)
@@ -82,6 +82,10 @@ class ImageQueryGraphConvolution(Module):
         # compute pseudo coordinate kernel weights
         weights = self.get_gaussian_weights(neighbourhood_pseudo_coord)
 
+        # print(batch_size, K, neighbourhood_size, self.n_kernels)
+        #print batch_size, K, neighbourhood_size, self.n_kernels form neighboihood psuedocord argument
+        # print(neighbourhood_pseudo_coord.size(0), neighbourhood_pseudo_coord.size(1), neighbourhood_pseudo_coord.size(2))
+        # print(weights.shape)
         weights = weights.view(
             batch_size * K, neighbourhood_size, self.n_kernels)
 
@@ -116,8 +120,7 @@ class ImageQueryGraphConvolution(Module):
 
         weights = weights_rho * weights_theta
         weights[(weights != weights).detach()] = 0
-
-        # normalise weights
+        
         weights = weights / torch.sum(weights, dim=1, keepdim=True)
 
         return weights

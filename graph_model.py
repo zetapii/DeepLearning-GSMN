@@ -117,10 +117,11 @@ class VisualGraph(nn.Module):
         # graph convolution layers
         self.graph_convolution_1 = \
             ImageQueryGraphConvolution(feat_dim, hid_dim, n_kernels, 2)
-
         # # output classifier
         self.out_1 = nn.utils.weight_norm(nn.Linear(hid_dim, hid_dim))
         self.out_2 = nn.utils.weight_norm(nn.Linear(hid_dim, out_dim))
+
+
 
     def node_level_matching(self, tnodes, vnodes, n_block, xlambda):
         # Node-level matching: find relevant nodes from another modality
@@ -151,6 +152,7 @@ class VisualGraph(nn.Module):
     def structure_level_matching(self, vnode_mvector, pseudo_coord):
         # (batch, n_region, n_region, num_block)
         batch, n_region = vnode_mvector.size(0), vnode_mvector.size(1)
+        # print("batch is ",batch," region is "  ,n_region)
         neighbor_image = vnode_mvector.unsqueeze(
             2).repeat(1, 1, n_region, 1)
 
@@ -168,11 +170,13 @@ class VisualGraph(nn.Module):
         similarities = []
         n_block = opt.embed_size // opt.num_block
         n_image, n_caption = images.size(0), captions.size(0)
-
+        # print("inf orward bb_shape ",bbox.shape)
         bb_size = (bbox[:, :, 2:] - bbox[:, :, :2])
         bb_centre = bbox[:, :, :2] + 0.5 * bb_size
 
-        pseudo_coord = self._compute_pseudo(bb_centre).cuda()
+        pseudo_coord = self._compute_pseudo(bb_centre)
+        
+        # print("printing in forward the shape ",pseudo_coord.shape)
         for i in range(n_caption):
             # Get the i-th text description
             n_word = cap_lens[i]
@@ -183,14 +187,20 @@ class VisualGraph(nn.Module):
             # --> (batch, n_region, n_word)
             vnode_mvector = self.node_level_matching(
                 cap_i_expand, images, n_block, opt.lambda_softmax)
+            # print(" vnode_mvector shape ",vnode_mvector.shape)
             v2t_similarity = self.structure_level_matching(
                 vnode_mvector, pseudo_coord)
-
             similarities.append(v2t_similarity)
 
         similarities = torch.cat(similarities, 1)
         return similarities
+    '''
+    3 March 2024
+    The code initially computes Cartesian coordinates (x and y differences) between bounding box centers using element-wise subtraction.
+    It then optionally converts to polar coordinates (rho, theta) by calculating the distance (magnitude) and angle (direction) of the relative position between each pair.
 
+    '''
+    
     def _compute_pseudo(self, bb_centre):
         '''
 
@@ -203,7 +213,7 @@ class VisualGraph(nn.Module):
         - pseudo_coord (batch_size, K, K, coord_dim)
         '''
         K = bb_centre.size(1)
-
+        # print("this is the size of bb_centre inside compute_pseudo ",bb_centre.size())
         # Compute cartesian coordinates (batch_size, K, K, 2)
         pseudo_coord = bb_centre.view(-1, K, 1, 2) - \
             bb_centre.view(-1, 1, K, 2)
@@ -250,14 +260,14 @@ class TextualGraph(nn.Module):
         self.out_2 = nn.utils.weight_norm(nn.Linear(hid_dim, out_dim))
 
     def build_sparse_graph(self, dep, lens):
-        adj = np.zeros((lens, lens), dtype=np.int)
+        adj = np.zeros((lens, lens), dtype=np.int_)
         for i, pair in enumerate(dep):
             if i == 0 or pair[0] >= lens or pair[1] >= lens:
                 continue
             adj[pair[0], pair[1]] = 1
             adj[pair[1], pair[0]] = 1
         adj = adj + np.eye(lens)
-        return torch.from_numpy(adj).cuda().float()
+        return torch.from_numpy(adj).float()
 
     def node_level_matching(self, vnodes, tnodes, n_block, xlambda):
 

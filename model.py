@@ -44,9 +44,11 @@ class EncoderImagePrecomp(nn.Module):
         super(EncoderImagePrecomp, self).__init__()
         self.embed_size = embed_size
         self.no_imgnorm = no_imgnorm
+        # print("this is transforming from ",img_dim," to ",embed_size)
         self.fc = nn.Linear(img_dim, embed_size)
 
         self.init_weights()
+        
 
     def init_weights(self):
         """Xavier initialization for the fully connected layer
@@ -185,7 +187,6 @@ class GSMN(object):
             opt.feat_dim, opt.hid_dim, opt.out_dim, dropout=.5)
         self.t2i_match_G = TextualGraph(
             opt.feat_dim, opt.hid_dim, opt.out_dim, dropout=.5)
-
         if torch.cuda.is_available():
             self.img_enc.cuda()
             self.txt_enc.cuda()
@@ -257,6 +258,7 @@ class GSMN(object):
     def forward_sim(self, img_emb, cap_emb, bbox, depends, cap_lens):
         i2t_scores = self.i2t_match_G(
             img_emb, cap_emb, bbox, cap_lens, self.opt)
+
         t2i_scores = self.t2i_match_G(
             img_emb, cap_emb, depends, cap_lens, self.opt)
         scores = i2t_scores + t2i_scores
@@ -279,7 +281,7 @@ class GSMN(object):
         # compute the embeddings
         img_emb, cap_emb, cap_lens = self.forward_emb(
             images, captions, lengths)
-
+        
         scores = self.forward_sim(img_emb, cap_emb, bboxes, depends, cap_lens)
 
         # measure accuracy and record loss

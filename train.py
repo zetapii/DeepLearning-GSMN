@@ -100,10 +100,12 @@ def main():
         opt.vocab_path, '%s_vocab.json' % opt.data_name))
     opt.vocab_size = len(vocab)
 
+    # print(opt.data_name, opt.batch_size, opt.workers) = f30k_precomp 128 10
     # Load data loaders
+
     train_loader, val_loader = data.get_loaders(
         opt.data_name, vocab, opt.batch_size, opt.workers, opt)
-
+    
     # Construct the model
     model = GSMN(opt)
 
@@ -162,11 +164,11 @@ def train(opt, train_loader, model, epoch, val_loader):
     for i, train_data in enumerate(train_loader):
         # switch to train mode
         model.train_start()
-
         # measure data loading time
+        
         data_time.update(time.time() - end)
-
         # make sure train logger is used
+        
         model.logger = train_logger
 
         # Update the model
@@ -195,7 +197,7 @@ def train(opt, train_loader, model, epoch, val_loader):
         model.logger.tb_log(tb_logger, step=model.Eiters)
 
         # validate at every val_step
-        if model.Eiters % opt.val_step == 0:
+        if model.Eiters % opt.val_step == 0: 
             validate(opt, val_loader, model)
 
 
