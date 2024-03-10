@@ -15,8 +15,8 @@ import os
 import json
 
 annotations = {
-    'coco_precomp': ['train_caps.txt', 'dev_caps.txt'],
-    'f30k_precomp': ['train_caps.txt', 'dev_caps.txt'],
+    'coco_precomp': ['train_caps.json', 'dev_caps.json'],
+    'f30k_precomp': ['train_caps.json', 'dev_caps.json'],
 }
 
 

@@ -41,8 +41,8 @@ class PrecompDataset(data.Dataset):
         self.images = np.load(loc + '%s_ims.npy' % data_split)
         self.length = len(self.captions)
 
-        self.bbox = np.load(loc + '%s_ims_bbx.npy' % data_split)
-        self.sizes = np.load(loc + '%s_ims_size.npy' % data_split)
+        self.bbox = np.load(loc + '%s_ims_bbx.npy' % data_split, allow_pickle=True)
+        self.sizes = np.load(loc + '%s_ims_size.npy' % data_split, allow_pickle=True)
 
         with open(loc + '%s_caps.json' % data_split) as f:
             self.depends = json.load(f)
@@ -61,9 +61,9 @@ class PrecompDataset(data.Dataset):
 
     def __getitem__(self, index):
         # handle the image redundancy
-        img_id = index / self.im_div
+        img_id = index // self.im_div
         image = torch.Tensor(self.images[img_id])
-        caption = self.captions[index]
+        caption = self.captions[index].decode("utf-8")
         vocab = self.vocab
         depend = self.depends[index]
 
@@ -87,7 +87,7 @@ class PrecompDataset(data.Dataset):
             bbox[3] /= imsize['image_h']
             bboxes[i] = bbox
 
-        captions = torch.Tensor(caps)
+        captions = torch.Tensor(list(caps))
         bboxes = torch.Tensor(bboxes)
         return image, captions, bboxes, depend, index, img_id
 
