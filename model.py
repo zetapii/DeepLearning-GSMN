@@ -14,9 +14,9 @@ import torch.nn.init
 import torchvision.models as models
 from torch.autograd import Variable
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
-from torch.nn.utils.weight_norm import weight_norm
+from torch.nn.utils.parametrizations import weight_norm
 import torch.backends.cudnn as cudnn
-from torch.nn.utils.clip_grad import clip_grad_norm
+from torch.nn.utils import clip_grad_norm_
 import numpy as np
 from collections import OrderedDict
 from graph_model import VisualGraph, TextualGraph
@@ -289,5 +289,5 @@ class GSMN(object):
         # compute gradient and do SGD step
         loss.backward()
         if self.grad_clip > 0:
-            clip_grad_norm(self.params, self.grad_clip)
+            clip_grad_norm_(self.params, self.grad_clip)
         self.optimizer.step()

@@ -119,8 +119,8 @@ class VisualGraph(nn.Module):
             ImageQueryGraphConvolution(feat_dim, hid_dim, n_kernels, 2)
 
         # # output classifier
-        self.out_1 = nn.utils.weight_norm(nn.Linear(hid_dim, hid_dim))
-        self.out_2 = nn.utils.weight_norm(nn.Linear(hid_dim, out_dim))
+        self.out_1 = nn.utils.parametrizations.weight_norm(nn.Linear(hid_dim, hid_dim))
+        self.out_2 = nn.utils.parametrizations.weight_norm(nn.Linear(hid_dim, out_dim))
 
     def node_level_matching(self, tnodes, vnodes, n_block, xlambda):
         # Node-level matching: find relevant nodes from another modality
@@ -246,8 +246,8 @@ class TextualGraph(nn.Module):
             TextQueryGraphConvolution(feat_dim, hid_dim, n_kernels, 2)
 
         # # output classifier
-        self.out_1 = nn.utils.weight_norm(nn.Linear(hid_dim, hid_dim))
-        self.out_2 = nn.utils.weight_norm(nn.Linear(hid_dim, out_dim))
+        self.out_1 = nn.utils.parametrizations.weight_norm(nn.Linear(hid_dim, hid_dim))
+        self.out_2 = nn.utils.parametrizations.weight_norm(nn.Linear(hid_dim, out_dim))
 
     def build_sparse_graph(self, dep, lens):
         adj = np.zeros((lens, lens), dtype=np.int)
