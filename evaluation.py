@@ -21,7 +21,6 @@ import torch
 from model import GSMN
 from collections import OrderedDict
 import time
-from torch.autograd import Variable
 
 
 class AverageMeter(object):
@@ -109,8 +108,9 @@ def encode_data(model, data_loader, log_step=10, logging=print):
         model.logger = val_logger
 
         # compute the embeddings
-        img_emb, cap_emb, cap_len = model.forward_emb(
-            images, captions, lengths, volatile=True)
+        with torch.no_grad():
+            img_emb, cap_emb, cap_len = model.forward_emb(
+                images, captions, lengths)
         # print(img_emb)
         if img_embs is None:
             if img_emb.dim() == 3:
@@ -328,16 +328,17 @@ def shard_xattn(model, images, captions, bbox, depends, caplens, opt, shard_size
             sys.stdout.write('\r>> shard_xattn batch (%d,%d)' % (i, j))
             cap_start, cap_end = shard_size * \
                 j, min(shard_size * (j + 1), len(captions))
-            im = Variable(torch.from_numpy(
-                images[im_start:im_end]), volatile=True).cuda().float()
-            s = Variable(torch.from_numpy(
-                captions[cap_start:cap_end]), volatile=True).cuda().float()
+            im = torch.Tensor(torch.from_numpy(
+                images[im_start:im_end])).cuda().float()
+            s = torch.Tensor(torch.from_numpy(
+                captions[cap_start:cap_end])).cuda().float()
             l = caplens[cap_start:cap_end]
-            bbx = Variable(torch.from_numpy(
-                bbox[im_start:im_end]), volatile=True).cuda().float()
+            bbx = torch.Tensor(torch.from_numpy(
+                bbox[im_start:im_end])).cuda().float()
             dep = depends[cap_start:cap_end]
 
-            sim = model.forward_sim(im, s, bbx, dep, l)
+            with torch.no_grad():
+                sim = model.forward_sim(im, s, bbx, dep, l)
             d[im_start:im_end, cap_start:cap_end] = sim.data.cpu().numpy()
     sys.stdout.write('\n')
     return d

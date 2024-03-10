@@ -19,7 +19,6 @@ import data
 from vocab import Vocabulary, deserialize_vocab
 from model import GSMN
 from evaluation import i2t, t2i, AverageMeter, LogCollector, encode_data, shard_xattn
-from torch.autograd import Variable
 
 import logging
 import tensorboard_logger as tb_logger

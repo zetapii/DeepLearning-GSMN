@@ -12,7 +12,6 @@ import torch
 import torch.nn as nn
 import torch.nn.init
 import torchvision.models as models
-from torch.autograd import Variable
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from torch.nn.utils.parametrizations import weight_norm
 import torch.backends.cudnn as cudnn
@@ -154,7 +153,7 @@ class ContrastiveLoss(nn.Module):
 
         # clear diagonals
         mask = torch.eye(scores.size(0)) > .5
-        I = Variable(mask)
+        I = torch.Tensor(mask)
         if torch.cuda.is_available():
             I = I.cuda()
         cost_s = cost_s.masked_fill_(I, 0)
@@ -237,12 +236,12 @@ class GSMN(object):
         self.i2t_match_G.eval()
         self.t2i_match_G.eval()
 
-    def forward_emb(self, images, captions, lengths, volatile=False):
+    def forward_emb(self, images, captions, lengths):
         """Compute the image and caption embeddings
         """
         # Set mini-batch dataset
-        images = Variable(images, volatile=volatile)
-        captions = Variable(captions, volatile=volatile)
+        images = torch.Tensor(images)
+        captions = torch.Tensor(captions)
         if torch.cuda.is_available():
             images = images.cuda()
             captions = captions.cuda()
