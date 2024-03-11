@@ -47,8 +47,8 @@ class PrecompDataset(data.Dataset):
         with open(loc + '%s_caps.json' % data_split) as f:
             self.depends = json.load(f)
 
-        print('image shape', self.images.shape)
-        print('text shape', len(self.captions))
+        print('image shape', self.images.shape, flush=True)
+        print('text shape', len(self.captions), flush=True)
 
         # rkiros data has redundancy in images, we divide by 5, 10crop doesn't
         if self.images.shape[0] != self.length:

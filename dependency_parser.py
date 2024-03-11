@@ -21,8 +21,8 @@ def parse_a_sentence(sent):
 
 
 def read_files(src_path,  tar_path):
-    print('src_path', src_path)
-    print('tar_path', tar_path)
+    print('src_path', src_path, flush=True)
+    print('tar_path', tar_path, flush=True)
     data = []
     reader = open(src_path, 'r')
     # writer = open(tar_path, 'w')
@@ -53,4 +53,4 @@ if __name__ == '__main__':
     opt = parser.parse_args()
     read_files(opt.src_path, opt.tar_path)
 
-    print('Done')
+    print('Done', flush=True)

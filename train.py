@@ -89,7 +89,7 @@ def main():
                         help='Whether model the text as a fully connected graph.')
 
     opt = parser.parse_args()
-    print(opt)
+    print(opt, flush=True)
 
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
     tb_logger.configure(opt.logger_name, flush_secs=5)
@@ -109,7 +109,7 @@ def main():
     # optionally resume from a checkpoint
     if opt.resume:
         if os.path.isfile(opt.resume):
-            print("=> loading checkpoint '{}'".format(opt.resume))
+            print("=> loading checkpoint '{}'".format(opt.resume), flush=True)
             checkpoint = torch.load(opt.resume)
             start_epoch = checkpoint['epoch']
             best_rsum = checkpoint['best_rsum']
@@ -118,16 +118,16 @@ def main():
             # training
             model.Eiters = checkpoint['Eiters']
             print("=> loaded checkpoint '{}' (epoch {}, best_rsum {})"
-                  .format(opt.resume, start_epoch, best_rsum))
+                  .format(opt.resume, start_epoch, best_rsum), flush=True)
             validate(opt, val_loader, model)
         else:
-            print("=> no checkpoint found at '{}'".format(opt.resume))
+            print("=> no checkpoint found at '{}'".format(opt.resume), flush=True)
 
     # Train the Model
     best_rsum = 0
     for epoch in range(opt.num_epochs):
-        print(opt.logger_name)
-        print(opt.model_name)
+        print(opt.logger_name, flush=True)
+        print(opt.model_name, flush=True)
 
         adjust_learning_rate(opt, model.optimizer, epoch)
 
@@ -209,7 +209,7 @@ def validate(opt, val_loader, model):
     sims = shard_xattn(model, img_embs, cap_embs, bboxes, depends, cap_lens,
                        opt, shard_size=64)  # changed from 128 to 64
     end = time.time()
-    print("calculate similarity time:", end - start)
+    print("calculate similarity time:", end - start, flush=True)
 
     # caption retrieval
 
@@ -256,7 +256,7 @@ def save_checkpoint(state, is_best, filename='checkpoint.pth.tar', prefix=''):
             tries -= 1
         else:
             break
-        print('model save {} failed, remaining {} trials'.format(filename, tries))
+        print('model save {} failed, remaining {} trials'.format(filename, tries), flush=True)
         if not tries:
             raise error
 

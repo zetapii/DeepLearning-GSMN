@@ -53,7 +53,7 @@ def serialize_vocab(vocab, dest):
 
 
 def deserialize_vocab(src):
-    print(src)
+    print(src, flush=True)
     with open(src) as f:
         d = json.load(f)
     vocab = Vocabulary()
@@ -83,7 +83,7 @@ def build_vocab(data_path, data_name, caption_file, threshold):
             counter.update(tokens)
 
             if i % 1000 == 0:
-                print("[%d/%d] tokenized the captions." % (i, len(captions)))
+                print("[%d/%d] tokenized the captions." % (i, len(captions)), flush=True)
 
     # Discard if the occurrence of the word is less than min_word_cnt.
     words = [word for word, cnt in counter.items() if cnt >= threshold]
@@ -105,7 +105,7 @@ def main(data_path, data_name):
     vocab = build_vocab(data_path, data_name,
                         caption_file=annotations, threshold=4)
     serialize_vocab(vocab, './vocab/%s_vocab.json' % data_name)
-    print("Saved vocabulary file to ", './vocab/%s_vocab.json' % data_name)
+    print("Saved vocabulary file to ", './vocab/%s_vocab.json' % data_name, flush=True)
 
 
 if __name__ == '__main__':

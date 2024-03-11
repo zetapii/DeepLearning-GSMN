@@ -87,43 +87,43 @@ if __name__ == '__main__':
     if not isfold5:
         sims = (sims1 + sims2) / 2
         im_len = len(sims)
-        print('im length:', im_len)
+        print('im length:', im_len, flush=True)
         r, rt = i2t(im_len, sims, return_ranks=True)
         ri, rti = t2i(im_len, sims, return_ranks=True)
         ar = (r[0] + r[1] + r[2]) / 3
         ari = (ri[0] + ri[1] + ri[2]) / 3
         rsum = r[0] + r[1] + r[2] + ri[0] + ri[1] + ri[2]
-        print("rsum: %.1f" % rsum)
-        print("Average i2t Recall: %.1f" % ar)
-        print("Image to text: %.1f %.1f %.1f %.1f %.1f" % r)
-        print("Average t2i Recall: %.1f" % ari)
-        print("Text to image: %.1f %.1f %.1f %.1f %.1f" % ri)
+        print("rsum: %.1f" % rsum, flush=True)
+        print("Average i2t Recall: %.1f" % ar, flush=True)
+        print("Image to text: %.1f %.1f %.1f %.1f %.1f" % r, flush=True)
+        print("Average t2i Recall: %.1f" % ari, flush=True)
+        print("Text to image: %.1f %.1f %.1f %.1f %.1f" % ri, flush=True)
     else:
         results = []
         for i in range(5):
             sim_shard = (sims1[i] + sims2[i]) / 2
             im_len = len(sim_shard)
-            print('im length:', im_len)
+            print('im length:', im_len, flush=True)
             r, rt0 = i2t(im_len, sim_shard, return_ranks=True)
-            print("Image to text: %.1f, %.1f, %.1f, %.1f, %.1f" % r)
+            print("Image to text: %.1f, %.1f, %.1f, %.1f, %.1f" % r, flush=True)
             ri, rti0 = t2i(im_len, sim_shard, return_ranks=True)
-            print("Text to image: %.1f, %.1f, %.1f, %.1f, %.1f" % ri)
+            print("Text to image: %.1f, %.1f, %.1f, %.1f, %.1f" % ri, flush=True)
 
             if i == 0:
                 rt, rti = rt0, rti0
             ar = (r[0] + r[1] + r[2]) / 3
             ari = (ri[0] + ri[1] + ri[2]) / 3
             rsum = r[0] + r[1] + r[2] + ri[0] + ri[1] + ri[2]
-            print("rsum: %.1f ar: %.1f ari: %.1f" % (rsum, ar, ari))
+            print("rsum: %.1f ar: %.1f ari: %.1f" % (rsum, ar, ari), flush=True)
             results += [list(r) + list(ri) + [ar, ari, rsum]]
 
-        print("-----------------------------------")
-        print("Mean metrics: ")
+        print("-----------------------------------", flush=True)
+        print("Mean metrics: ", flush=True)
         mean_metrics = tuple(np.array(results).mean(axis=0).flatten())
-        print("rsum: %.1f" % (mean_metrics[10] * 6))
-        print("Average i2t Recall: %.1f" % mean_metrics[11])
+        print("rsum: %.1f" % (mean_metrics[10] * 6), flush=True)
+        print("Average i2t Recall: %.1f" % mean_metrics[11], flush=True)
         print("Image to text: %.1f %.1f %.1f %.1f %.1f" %
-              mean_metrics[:5])
-        print("Average t2i Recall: %.1f" % mean_metrics[12])
+              mean_metrics[:5], flush=True)
+        print("Average t2i Recall: %.1f" % mean_metrics[12], flush=True)
         print("Text to image: %.1f %.1f %.1f %.1f %.1f" %
-              mean_metrics[5:10])
+              mean_metrics[5:10], flush=True)

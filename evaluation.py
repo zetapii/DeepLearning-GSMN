@@ -159,7 +159,7 @@ def evalrank(model_path, data_path=None, split='dev', fold5=False):
     # load model and options
     checkpoint = torch.load(model_path)
     opt = checkpoint['opt']
-    print(opt)
+    print(opt, flush=True)
 
     if data_path is not None:
         opt.data_path = data_path
@@ -176,15 +176,15 @@ def evalrank(model_path, data_path=None, split='dev', fold5=False):
     # load model state
     model.load_state_dict(checkpoint['model'])
 
-    print('Loading dataset')
+    print('Loading dataset', flush=True)
     data_loader = get_test_loader(split, opt.data_name, vocab,
                                   opt.batch_size, opt.workers, opt)
 
-    print('Computing results...')
+    print('Computing results...', flush=True)
     img_embs, cap_embs, bbox, depends, cap_lens = encode_data(
         model, data_loader)
     print('Images: %d, Captions: %d' %
-          (img_embs.shape[0] / 5, cap_embs.shape[0]))
+          (img_embs.shape[0] / 5, cap_embs.shape[0]), flush=True)
 
     if not fold5:
         # no cross-validation, full evaluation
@@ -193,18 +193,18 @@ def evalrank(model_path, data_path=None, split='dev', fold5=False):
         sims = shard_xattn(model, img_embs, cap_embs, bbox,
                            depends, cap_lens, opt, shard_size=80)
         end = time.time()
-        print("calculate similarity time:", end - start)
+        print("calculate similarity time:", end - start, flush=True)
 
         r, rt = i2t(img_embs, sims, return_ranks=True)
         ri, rti = t2i(img_embs, sims, return_ranks=True)
         ar = (r[0] + r[1] + r[2]) / 3
         ari = (ri[0] + ri[1] + ri[2]) / 3
         rsum = r[0] + r[1] + r[2] + ri[0] + ri[1] + ri[2]
-        print("rsum: %.1f" % rsum)
-        print("Average i2t Recall: %.1f" % ar)
-        print("Image to text: %.1f %.1f %.1f %.1f %.1f" % r)
-        print("Average t2i Recall: %.1f" % ari)
-        print("Text to image: %.1f %.1f %.1f %.1f %.1f" % ri)
+        print("rsum: %.1f" % rsum, flush=True)
+        print("Average i2t Recall: %.1f" % ar, flush=True)
+        print("Image to text: %.1f %.1f %.1f %.1f %.1f" % r, flush=True)
+        print("Average t2i Recall: %.1f" % ari, flush=True)
+        print("Text to image: %.1f %.1f %.1f %.1f %.1f" % ri, flush=True)
     else:
         # 5fold cross-validation, only for MSCOCO
         results = []
@@ -219,31 +219,31 @@ def evalrank(model_path, data_path=None, split='dev', fold5=False):
             sims = shard_xattn(model, img_embs_shard, cap_embs_shard,
                                bbox_shard, depends_shard, cap_lens_shard, opt, shard_size=80)
             end = time.time()
-            print("calculate similarity time:", end - start)
+            print("calculate similarity time:", end - start, flush=True)
 
             r, rt0 = i2t(img_embs_shard, sims, return_ranks=True)
-            print("Image to text: %.1f, %.1f, %.1f, %.1f, %.1f" % r)
+            print("Image to text: %.1f, %.1f, %.1f, %.1f, %.1f" % r, flush=True)
             ri, rti0 = t2i(img_embs_shard, sims, return_ranks=True)
-            print("Text to image: %.1f, %.1f, %.1f, %.1f, %.1f" % ri)
+            print("Text to image: %.1f, %.1f, %.1f, %.1f, %.1f" % ri, flush=True)
 
             if i == 0:
                 rt, rti = rt0, rti0
             ar = (r[0] + r[1] + r[2]) / 3
             ari = (ri[0] + ri[1] + ri[2]) / 3
             rsum = r[0] + r[1] + r[2] + ri[0] + ri[1] + ri[2]
-            print("rsum: %.1f ar: %.1f ari: %.1f" % (rsum, ar, ari))
+            print("rsum: %.1f ar: %.1f ari: %.1f" % (rsum, ar, ari), flush=True)
             results += [list(r) + list(ri) + [ar, ari, rsum]]
 
-        print("-----------------------------------")
-        print("Mean metrics: ")
+        print("-----------------------------------", flush=True)
+        print("Mean metrics: ", flush=True)
         mean_metrics = tuple(np.array(results).mean(axis=0).flatten())
-        print("rsum: %.1f" % (mean_metrics[10] * 6))
-        print("Average i2t Recall: %.1f" % mean_metrics[11])
+        print("rsum: %.1f" % (mean_metrics[10] * 6), flush=True)
+        print("Average i2t Recall: %.1f" % mean_metrics[11], flush=True)
         print("Image to text: %.1f %.1f %.1f %.1f %.1f" %
-              mean_metrics[:5])
-        print("Average t2i Recall: %.1f" % mean_metrics[12])
+              mean_metrics[:5], flush=True)
+        print("Average t2i Recall: %.1f" % mean_metrics[12], flush=True)
         print("Text to image: %.1f %.1f %.1f %.1f %.1f" %
-              mean_metrics[5:10])
+              mean_metrics[5:10], flush=True)
 
     torch.save({'rt': rt, 'rti': rti}, 'ranks.pth.tar')
 
@@ -257,7 +257,7 @@ def evalstack(model_path, data_path=None, split='dev', fold5=False):
     # load model and options
     checkpoint = torch.load(model_path)
     opt = checkpoint['opt']
-    print(opt)
+    print(opt, flush=True)
     if data_path is not None:
         opt.data_path = data_path
         opt.vocab_path = "/media/ubuntu/data/chunxiao/vocab"
@@ -273,15 +273,15 @@ def evalstack(model_path, data_path=None, split='dev', fold5=False):
     # load model state
     model.load_state_dict(checkpoint['model'])
 
-    print('Loading dataset')
+    print('Loading dataset', flush=True)
     data_loader = get_test_loader(split, opt.data_name, vocab,
                                   opt.batch_size, opt.workers, opt)
 
-    print('Computing results...')
+    print('Computing results...', flush=True)
     img_embs, cap_embs, bbox, depends, cap_lens = encode_data(
         model, data_loader)
     print('Images: %d, Captions: %d' %
-          (img_embs.shape[0] / 5, cap_embs.shape[0]))
+          (img_embs.shape[0] / 5, cap_embs.shape[0]), flush=True)
 
     if not fold5:
         # no cross-validation, full evaluation
@@ -290,7 +290,7 @@ def evalstack(model_path, data_path=None, split='dev', fold5=False):
         sims = shard_xattn(model, img_embs, cap_embs, bbox,
                            depends, cap_lens, opt, shard_size=80)
         end = time.time()
-        print("calculate similarity time:", end - start)
+        print("calculate similarity time:", end - start, flush=True)
         return sims
 
     else:
@@ -306,7 +306,7 @@ def evalstack(model_path, data_path=None, split='dev', fold5=False):
             sims = shard_xattn(model, img_embs_shard, cap_embs_shard,
                                bbox_shard, depend_shard, cap_lens_shard, opt, shard_size=80)
             end = time.time()
-            print("calculate similarity time:", end - start)
+            print("calculate similarity time:", end - start, flush=True)
 
             sims_a.append(sims)
 
